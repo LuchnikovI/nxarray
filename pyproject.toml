@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "nxarray"
+version = "0.0.1"
+description = "Arrays with named axes convenient for tensor networks programming"
+authors = ["Ilia Luchnikov <luchnikovilya@gmail.com>"]
+packages = [{ include = "nxarray", from = '.' }]
+
+[tool.poetry.dpendencies]
+python = ">=3.10" 
+pytest = "^8"
+numpy = "^2"
+ordered-set = "^4"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

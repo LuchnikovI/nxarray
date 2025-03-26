@@ -1,0 +1,5 @@
+seed: 43
+max_depth: 10
+max_rank: 5
+max_local_dimension: 5
+max_elements_number: 1024
