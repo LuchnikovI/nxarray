@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+# fmt: off
 from numpy.random import normal
 from numpy import isclose
 from nxarray import NXArray

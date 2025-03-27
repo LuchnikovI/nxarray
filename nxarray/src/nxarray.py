@@ -262,9 +262,11 @@ class NXArray:
             if ordered_other is None:
                 return False
             else:
-                return self.shape == ordered_other.shape and bool(
-                    isclose(self._array, ordered_other._array).all()
-                ) and bool(isclose(self._log_norm, ordered_other._log_norm))
+                return (
+                    self.shape == ordered_other.shape
+                    and bool(isclose(self._array, ordered_other._array).all())
+                    and bool(isclose(self._log_norm, ordered_other._log_norm))
+                )
         return NotImplemented
 
     def __str__(self) -> str:

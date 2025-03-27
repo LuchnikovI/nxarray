@@ -40,6 +40,7 @@ compareFinalNXArrays = evalState helper where
             arrId2 <- gets ((\x -> x - 1) . varsNum)
             return $
                 shebang ++
+                "# fmt: off\n" ++ -- disable python black
                 imports ++
                 funcHeader ++
                 genPyCode tree ++
