@@ -1,7 +1,7 @@
 from types import EllipsisType
 from copy import copy
 from itertools import chain
-from typing import Hashable, Tuple, Union, Any, Iterable, Optional
+from typing import Hashable, Tuple, Union, Any, Iterable, Optional, Callable
 from numpy.typing import NDArray
 from numpy import tensordot, transpose, isclose, log, exp
 from numpy.linalg import norm
@@ -93,7 +93,9 @@ class NXArray:
     def norm(self) -> NDArray:
         return exp(self._log_norm)
 
-    def _release_transposed_immutable_view(self, *index_ids: Hashable) -> NDArray:
+    def _release_transposed_immutable_view(
+        self, *index_ids: Hashable
+    ) -> NDArray:
         assert self.rank == len(index_ids)
         if len(self._array.shape) == 0:
             return self._array
@@ -143,6 +145,13 @@ class NXArray:
     def release_array(self, *index_ids: Hashable) -> NDArray:
         return self.release_normalized_array(*index_ids) * self.norm
 
+    """
+    Relabels indices according to the passed closure.
+    """
+
+    def relabel(self, func: Callable[[Hashable], Hashable]) -> None:
+        self._index_ids = tuple(map(func, self._index_ids))
+
     def _transpose(self, *new_subsystems_order: Hashable) -> "NXArray":
         assert len(self.index_ids) == len(
             new_subsystems_order
@@ -151,16 +160,24 @@ class NXArray:
         new_state_arr = transpose(self._array, tuple(new_raw_order))
         return NXArray(new_state_arr, *new_subsystems_order)
 
-    def _back_partial_transpose(self, *new_subsystems_order: Hashable) -> "NXArray":
+    def _back_partial_transpose(
+        self, *new_subsystems_order: Hashable
+    ) -> "NXArray":
         _check_unique(new_subsystems_order)
         rest_ids = OrderedSet(self.index_ids).difference(new_subsystems_order)
-        new_subsystems_order_completed = tuple(chain(rest_ids, new_subsystems_order))
+        new_subsystems_order_completed = tuple(
+            chain(rest_ids, new_subsystems_order)
+        )
         return self._transpose(*new_subsystems_order_completed)
 
-    def _front_partial_transpose(self, *new_subsystems_order: Hashable) -> "NXArray":
+    def _front_partial_transpose(
+        self, *new_subsystems_order: Hashable
+    ) -> "NXArray":
         _check_unique(new_subsystems_order)
         rest_ids = OrderedSet(self.index_ids).difference(new_subsystems_order)
-        new_subsystems_order_completed = tuple(chain(new_subsystems_order, rest_ids))
+        new_subsystems_order_completed = tuple(
+            chain(new_subsystems_order, rest_ids)
+        )
         return self._transpose(*new_subsystems_order_completed)
 
     def _partial_transpose(
@@ -239,7 +256,8 @@ class NXArray:
     def __getitem__(
         self,
         idx: Union[
-            Tuple[Union[EllipsisType, Hashable], ...], Union[EllipsisType, Hashable]
+            Tuple[Union[EllipsisType, Hashable], ...],
+            Union[EllipsisType, Hashable],
         ],
     ) -> Tuple[int, "NXArray"]:
         if not isinstance(idx, tuple):
