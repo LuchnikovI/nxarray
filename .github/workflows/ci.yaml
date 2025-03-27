@@ -44,4 +44,4 @@ jobs:
 
       - name: Running tests
         run: |
-          ./tests/run_tests.sh
+          poetry run ./tests/run_tests.sh
