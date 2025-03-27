@@ -45,4 +45,5 @@ jobs:
       - name: Running tests
         shell: bash
         run: |
-          poetry run ./tests/run_tests.sh
+          cd "${{ github.workspace }}/tests"
+          poetry run bash run_tests.sh
