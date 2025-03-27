@@ -33,8 +33,8 @@ jobs:
       - name: Configure Poetry virtualenv in project
         run: poetry config virtualenvs.in-project true
 
-      - name: Install dependencies (without installing project)
-        run: poetry install --no-root
+      - name: Install dependencies
+        run: poetry install
 
       - name: Check formatting with Black
         run: poetry run black --check src
