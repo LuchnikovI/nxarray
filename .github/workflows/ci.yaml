@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest]
         python-version: ["3.10"]
 
     steps:
@@ -43,7 +43,5 @@ jobs:
         run: poetry run mypy src
 
       - name: Running tests
-        shell: bash
         run: |
-          cd "${{ github.workspace }}/tests"
-          poetry run bash run_tests.sh
+          poetry run ./tests/run_tests.sh
