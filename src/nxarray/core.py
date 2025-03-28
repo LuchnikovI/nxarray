@@ -158,7 +158,9 @@ class NXArray:
         ), f"{len(self.index_ids)}, {len(new_subsystems_order)}"
         new_raw_order = map(self.index_ids.index, new_subsystems_order)
         new_state_arr = transpose(self._array, tuple(new_raw_order))
-        return NXArray(new_state_arr, *new_subsystems_order)
+        new_nxarr = NXArray(new_state_arr, *new_subsystems_order)
+        new_nxarr._log_norm += self.log_norm
+        return new_nxarr
 
     def _back_partial_transpose(
         self, *new_subsystems_order: Hashable
