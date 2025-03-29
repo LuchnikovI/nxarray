@@ -62,7 +62,7 @@ class NXArray:
         _norm = norm(array)
         self._log_norm = log(_norm)
         if kwargs.get("add_log_norm"):
-            self._log_norm += kwargs["log_norm"]
+            self._log_norm += kwargs["add_log_norm"]
         self._array = array / _norm
         self._index_ids = index_ids
 
