@@ -55,11 +55,14 @@ class NXArray:
         self,
         array: NDArray,
         *index_ids: Hashable,
+        **kwargs: Any,
     ) -> None:
         _check_unique(*index_ids)
         _check_ids_number(array, *index_ids)
         _norm = norm(array)
         self._log_norm = log(_norm)
+        if kwargs.get("add_log_norm"):
+            self._log_norm += kwargs["log_norm"]
         self._array = array / _norm
         self._index_ids = index_ids
 
@@ -158,8 +161,9 @@ class NXArray:
         ), f"{len(self.index_ids)}, {len(new_subsystems_order)}"
         new_raw_order = map(self.index_ids.index, new_subsystems_order)
         new_state_arr = transpose(self._array, tuple(new_raw_order))
-        new_nxarr = NXArray(new_state_arr, *new_subsystems_order)
-        new_nxarr._log_norm += self.log_norm
+        new_nxarr = NXArray(
+            new_state_arr, *new_subsystems_order, add_log_norm=self.log_norm
+        )
         return new_nxarr
 
     def _back_partial_transpose(
@@ -213,9 +217,9 @@ class NXArray:
                 common_size,
             )
             rest_ids = _not_common_ids(self.index_ids, other.index_ids)
-            result_nxarr = NXArray(new_arr, *rest_ids)
-            result_nxarr._log_norm += self.log_norm
-            result_nxarr._log_norm += other.log_norm
+            result_nxarr = NXArray(
+                new_arr, *rest_ids, add_log_norm=self.log_norm + other.log_norm
+            )
             return result_nxarr
         elif isinstance(other, float):
             result_nxarr = copy(self)

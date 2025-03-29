@@ -42,8 +42,9 @@ def _decompose(
     left_arr = reshape(left_arr, (*left_shape, -1))
     right_arr = reshape(right_arr, (-1, *right_shape))
     left_nxarr = NXArray(left_arr, *left_indices, new_index_id)
-    right_nxarr = NXArray(right_arr, new_index_id, *right_indices)
-    right_nxarr._log_norm += log_norm
+    right_nxarr = NXArray(
+        right_arr, new_index_id, *right_indices, add_log_norm=log_norm
+    )
     return left_nxarr, right_nxarr
 
 
