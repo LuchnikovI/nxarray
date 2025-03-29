@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from types import EllipsisType
 from copy import copy
 from itertools import chain
@@ -38,6 +39,18 @@ def _not_common_ids(
     return OrderedSet(lhs).symmetric_difference(OrderedSet(rhs))
 
 
+"""
+Object containing dimension of the index (accesible via `.dimension`) and
+ID of the index (accesible via `.index_id`)
+"""
+
+
+@dataclass(frozen=True)
+class NXIndex:
+    dimension: int
+    index_id: Hashable
+
+
 class NXArray:
     """
     Array with named indices.
@@ -59,30 +72,38 @@ class NXArray:
     ) -> None:
         _check_unique(*index_ids)
         _check_ids_number(array, *index_ids)
+        self._indices = tuple(
+            map(lambda args: NXIndex(*args), zip(array.shape, index_ids))
+        )
         _norm = norm(array)
         self._log_norm = log(_norm)
         if kwargs.get("add_log_norm"):
             self._log_norm += kwargs["add_log_norm"]
         self._array = array / _norm
-        self._index_ids = index_ids
 
-    """Gives sequense of index IDs present in the NXArray, order of IDs is no specified."""
+    """Gives sequense of index IDs present in the NXArray which matches sequence of NXIndex objects accesible via `.indices`."""
 
     @property
     def index_ids(self) -> Tuple[Hashable, ...]:
-        return self._index_ids
+        return tuple(map(lambda i: i.index_id, self._indices))
 
-    """Gives shape of the underlying raw array which matches sequence of index IDs obtained by `.index_ids`."""
+    """Gives shape of the underlying raw array which matches sequence of NXIndex objects accesible via `.indices`."""
 
     @property
     def shape(self) -> Tuple[int, ...]:
-        return self._array.shape
+        return tuple(map(lambda i: i.dimension, self._indices))
+
+    """Gives a tuple of NXIndex objects (a pair of index dimension and its ID). Order of NXIndex objects is not specified."""
+
+    @property
+    def indices(self) -> Tuple[NXIndex, ...]:
+        return self._indices
 
     """Gives rank (number of indices) of the NXArray."""
 
     @property
     def rank(self) -> int:
-        return len(self.shape)
+        return len(self.indices)
 
     """Returns natural logorithm of the 2-norm."""
 
@@ -153,7 +174,12 @@ class NXArray:
     """
 
     def relabel(self, func: Callable[[Hashable], Hashable]) -> None:
-        self._index_ids = tuple(map(func, self._index_ids))
+        self._indices = tuple(
+            map(
+                lambda idx: NXIndex(idx.dimension, func(idx.index_id)),
+                self._indices,
+            )
+        )
 
     def _transpose(self, *new_subsystems_order: Hashable) -> "NXArray":
         assert len(self.index_ids) == len(
@@ -279,6 +305,8 @@ class NXArray:
                 return other._transpose(*self.index_ids)
             except ValueError:
                 return None
+
+    # standard magic methods
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, NXArray):
